@@ -1,33 +1,43 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const ApplicationError = require("../errors/ApplicationError");
 require("dotenv").config();
 
 class UserController {
-  static createUser = async (req, res) => {
-    const { username, password } = req.body;
+  static createUser = async (username, password) => {
+    if (!((await this.findByUsername(username)) instanceof ApplicationError)) {
+      return new ApplicationError("The user alredy exists", 409);
+    }
+
     const hashPassword = await this.encryptPassword(password);
-    console.log(hashPassword);
     const user = new User({ username, password: hashPassword });
-    user.save((err, user) => {
-      if (err) return res.status(500).send(err);
-      else res.status(201).send(user);
-    });
-  }
+    return await user.save();
+  };
+
+  static findById = async (id) => {
+    const user = await User.findById(id);
+    if (!user) return new ApplicationError("User not found", 404);
+    return user;
+  };
 
   static findByUsername = async (username) => {
-    const user = await User.findOne({ username });
-    if (!user) return res.status(400).send("User not found");
-    return user;
-  }
+    try {
+      const user = await User.findOne({ username });
+      if (!user) return new ApplicationError("User not found", 404);
+      return user;
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   static verifyPassword = async (password, hashPassword) => {
-    return bcrypt.compare(password, hashPassword);
-  }
+    return await bcrypt.compare(password, hashPassword);
+  };
 
   static encryptPassword = async (password) => {
     const hashPassword = await bcrypt.hash(password, +process.env.ROUND_TIMES);
     return hashPassword;
-  }
+  };
 }
 
 module.exports = UserController;

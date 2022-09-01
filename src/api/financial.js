@@ -1,9 +1,8 @@
 const axios = require("axios");
-const BasicError = require("../errors/BasicError.js");
-const path = "./src/api/financial.js";
+const ApplicationError = require("../errors/ApplicationError");
 
 class financialApi {
-  static getStocks = async (req, res) => {
+  static getStocks = async (req, res, next) => {
     const cod = req.query.cod;
 
     try {
@@ -12,12 +11,10 @@ class financialApi {
       );
       const data = apiRequest.data;
       if (!(data.length > 0)) {
-        const basicError = new BasicError(
+        next(new ApplicationError(
           "The symbol is not available",
-          404,
-          path
-        );
-        basicError.sendResponse(res);
+          404
+        ));
       } else {
         const filteredData = {
           name: data[0].name,
@@ -28,8 +25,7 @@ class financialApi {
       }
     } catch (error) {
       if (error.code === "ENOTFOUND") {
-        const basicError = new BasicError("The host is not found", 503, path);
-        basicError.sendResponse(res);
+        next(new ApplicationError("The host is not found", 503));
       } else {
         console.error(error);
       }
