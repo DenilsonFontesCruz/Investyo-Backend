@@ -1,6 +1,7 @@
 const router = require("express").Router();
-const financialApi = require("../api/financial.js");
-const UserController = require("../controllers/userController.js");
+const FinancialApi = require("../api/financial.js");
+const OperationController = require("../controllers/OperationController.js");
+const UserController = require("../controllers/UserController.js");
 const passport = require("passport");
 const ApplicationError = require("../errors/ApplicationError.js");
 const jwt = require("jsonwebtoken");
@@ -10,7 +11,13 @@ router.get("/", (req, res, next) => {
   res.send(`<h1>Test</h1>`);
 });
 
-router.get("/stocks", financialApi.getStocks);
+router.post("/stocks", async (req, res, next) => {
+  const { symbol, quantity } = req.body;
+  const operation = await OperationController.createOperation(symbol, quantity);
+  if (operation instanceof ApplicationError) return next(operation);
+  res.status(200).send(operation);
+});
+
 router.post(
   "/register",
   passport.authenticate("signup", { session: false }),
@@ -21,32 +28,24 @@ router.post(
   }
 );
 
-router.post("/login", 
-async (req, res, next) => {
-  passport.authenticate(
-    "login",
-  async (err, user, info) => {
+router.post("/login", async (req, res, next) => {
+  passport.authenticate("login", async (err, user, info) => {
     try {
-      if (err || !user) return next(err ||new ApplicationError('An error occurred.', 500));
+      if (err || !user)
+        return next(err || new ApplicationError("An error occurred.", 500));
 
-      req.login(
-        user,
-        { session: false },
-        async (error) => {
-          if (error) return next(error);
+      req.login(user, { session: false }, async (error) => {
+        if (error) return next(error);
 
-          const body = { _id: user._id, username: user.username };
-          const token = jwt.sign({ user: body }, process.env.SECRET_KEY);
+        const body = { _id: user._id, username: user.username };
+        const token = jwt.sign({ user: body }, process.env.SECRET_KEY);
 
-          return res.json({ token });
-        }
-      );
-    }catch(error) {
+        return res.json({ token });
+      });
+    } catch (error) {
       return next(error);
     }
-  }
-  )(req, res, next);
+  })(req, res, next);
 });
-
 
 module.exports = router;
