@@ -10,6 +10,10 @@ const operationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
   },
+  group: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "operationGroups",
+  }
 });
 
 const operations = mongoose.model("operations", operationSchema);
