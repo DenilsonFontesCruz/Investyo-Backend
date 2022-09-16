@@ -36,7 +36,7 @@ passport.use(
     async (username, password, done) => {
       try {
         const user = await userController.findByUsername(username);
-        if (user instanceof ApplicationError) done(user);
+        if (!user) throw new ApplicationError("User not found", 404);
 
         const passwordIsValid = await userController.verifyPassword(
           password,

@@ -4,6 +4,8 @@ const userSchema = new mongoose.Schema({
   id: { type: String },
   username: { type: String, unique: true, required: true },
   password: { type: String, required: true },
+  balance: {type: Number, required: true},
+  operations: [{ type: mongoose.Schema.Types.ObjectId, ref: "operations" }],
 });
 
 const users = mongoose.model("users", userSchema);
