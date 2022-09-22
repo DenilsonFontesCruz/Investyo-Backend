@@ -66,7 +66,7 @@ class UserController {
 
   /*Operations*/
 
-  static createOperation = async ({ symbol, quantity }, userId) => {
+  static createOperation = async (symbol, quantity, userId, isItBuy) => {
     try {
       const operation = await OperationController.createOperation({
         symbol,
@@ -85,17 +85,8 @@ class UserController {
     }
   };
 
-  static existsSymbolInWallet = async (symbol, userId) => {
-    try {
-      const operations = await this.findAllOperations(userId);
-      const filteredOperations = operations.filter((i) => {
-        if(i.symbol == symbol) return true;
-      });
-      return filteredOperations;
-    } catch (err) {
-      throw err;
-    }
-  };
+  // 
+  
 
   
 

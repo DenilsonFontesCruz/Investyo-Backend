@@ -6,6 +6,7 @@ const operationSchema = new mongoose.Schema({
   stockValue: { type: Number, required: true },
   quantity: { type: Number, required: true },
   category: { type: String },
+  isItBuy: {type: Boolean},
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
