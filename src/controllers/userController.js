@@ -68,7 +68,7 @@ class UserController {
 
   static createOperation = async (symbol, quantity, userId, isItBuy) => {
     try {
-      const operation = await OperationController.createOperation({
+      const operation = await OperationController.createOperation({ 
         symbol,
         quantity,
         userId,

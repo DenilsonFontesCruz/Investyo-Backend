@@ -3,9 +3,10 @@ const Operation = require("../models/Operation.js");
 const ApplicationError = require("../errors/ApplicationError");
 const ExchangeApi = require("../api/exchange.js");
 const OperationGroups = require("../models/operationGroup.js");
+const OperationGroupController = require("./OperationGroupController.js");
 
 class OperationController {
-  static createOperation = async (symbol, quantity, userId, isItBuy) => {
+  static createOperation = async ({symbol, quantity, userId, isItBuy}) => {
     try {
       if (quantity <= 0 || quantity > 10000) {
         throw new ApplicationError("Quantity is not allowed", 406);
@@ -18,7 +19,7 @@ class OperationController {
 
       let group = this.findGroup(symbol);
       if (!group) {
-        group = this.createGroup(symbol, userId);
+        group = OperationGroupController.createGroup(symbol, userId);
       }
 
       const operation = new Operation({
@@ -31,7 +32,13 @@ class OperationController {
         group,
       });
 
-      this.updateGroup(symbol, quantity, stockValue, isItBuy, await operation.save());
+      OperationGroupController.updateGroup({
+        symbol,
+        quantity,
+        stockValue,
+        isItBuy,
+        await operation.save()
+    });
 
       return operation;
     } catch (err) {
@@ -58,63 +65,6 @@ class OperationController {
   static buyOperation = async () => {
     try {
       this.createOperation(symbol, quantity, userId, true);
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  static createGroup = async (symbol, userId) => {
-    try {
-      const group = new OperationGroup({
-        symbol,
-        quantity: 0,
-        stockValueAverage: 0,
-        totalValue: 0,
-        user: userId,
-      });
-      return await group.save;
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  static updateGroup = async (symbol, quantity, stockValue, isItBuy, operation) => {
-    try {
-      const group = await this.findGroup(symbol);
-      if (!group) throw new ApplicationError("Group not found", 404);
-
-      if (!isItBuy && quantity > group.quantity) {
-        throw new ApplicationError("Invalid quantity", 406);
-      }
-      let totalQuantity;
-      let stockValueAverage;
-
-      if (isItBuy) {
-        totalQuantity = quantity + group.quantity;
-        stockValueAverage =
-          (stockValue * quantity + group.totalValue) / totalQuantity;
-      } else {
-        totalQuantity = group.quantity - quantity;
-        stockValueAverage =
-          (group.totalValue - stockValue * quantity) / totalQuantity;
-      }
-
-      const totalValue = stockValueAverage * totalQuantity;
-
-      group.quantity = totalQuantity;
-      group.stockValueAverage = stockValueAverage;
-      group.totalValue = totalValue;
-      group.operations.push(operation);
-
-      return await group.save();
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  static findGroup = async (symbol) => {
-    try {
-      return await OperationGroups.findOne({ symbol });
     } catch (err) {
       throw err;
     }

@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   balance: {type: Number, required: true},
   operationGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: "operationGroups" }],
-  operations: [{ type: mongoose.Schema.Types.ObjectId, ref: "operations" }],
 });
 
 const users = mongoose.model("users", userSchema);

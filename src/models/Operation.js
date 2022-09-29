@@ -7,10 +7,6 @@ const operationSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   category: { type: String },
   isItBuy: {type: Boolean},
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-  },
   group: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "operationGroups",
