@@ -55,10 +55,10 @@ passport.use(
 );
 
 passport.use(
-  new JWTstrategy(
+  new JWTstrategy (
     {
       secretOrKey: process.env.SECRET_KEY,
-      jwtFromRequest: ExtractJWT.fromHeader("authorization")
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
     },
     async (token, done) => {
       try {

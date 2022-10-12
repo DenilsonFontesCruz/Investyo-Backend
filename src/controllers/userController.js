@@ -1,13 +1,12 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const ApplicationError = require("../errors/ApplicationError");
-const OperationController = require("./OperationController");
 const ExchangeApi = require("../api/exchange");
 const delay = require("delay");
 require("dotenv").config();
 
 class UserController {
-  /*Register and Login*/
+  /*Register, Login, Log Out*/
 
   static createUser = async (username, password) => {
     try {
@@ -64,97 +63,14 @@ class UserController {
     }
   };
 
-  /*Operations*/
-
-  static createOperation = async (symbol, quantity, userId, isItBuy) => {
+  static createToken = async (username) => {
     try {
-      const operation = await OperationController.createOperation({ 
-        symbol,
-        quantity,
-        userId,
+      const body = { _id: user._id, username: user.username };
+      const token = jwt.sign({ user: body }, process.env.SECRET_KEY, {
+        expiresIn: "15m",
       });
 
-      const operationTotalValue = operation.stockValue * operation.quantity;
-
-      const user = await this.findById(userId);
-      user.operations.push(operation);
-
-      return await user.save();
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  // 
-  
-
-  
-
-  // static editOperation = async ({ quantity, operationId }, userId) => {
-  //   try {
-  //     const oldOperation = await OperationController.findById(operationId);
-  //     const stockValue = oldOperation.stockValue;
-  //     const oldQuantity = oldOperation.quantity;
-
-  //     if (quantity === 0) {
-  //       await OperationController.deleteOperation(operationId);
-
-  //       const operationTotalValue = stockValue * oldQuantity;
-  //     } else {
-  //       const operation = await OperationController.updateOperation(
-  //         operationId,
-  //         quantity
-  //       );
-
-  //       const operationTotalValue =
-  //         stockValue * (oldQuantity - operation.quantity);
-
-  //       const user = await this.findById(userId);
-  //       user.operations.push(operation);
-
-  //       return await user.save();
-  //     }
-  //   } catch (err) {
-  //     throw err;
-  //   }
-  // };
-
-  /*Wallet*/
-
-  static findAllOperations = async (userId) => {
-    try {
-      const user = await this.findById(userId);
-      const result = await user.populate("operations");
-      return (await result.toObject()).operations;
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  static getUserWallet = async (userId, currency) => {
-    try {
-      this.existsSymbolInWallet("AAPL", userId);
-      const rawOperations = await this.findAllOperations(userId);
-
-      const operationsFormatted = await Promise.all(
-        rawOperations.map(async (item) => {
-          const operation = await OperationController.formatOperation(
-            item,
-            currency
-          );
-          return operation;
-        })
-      );
-
-      let totalOperationsValue = 0;
-      operationsFormatted.forEach((i) => {
-        totalOperationsValue += i.totalValue;
-      });
-
-      return {
-        operationsFormatted,
-        totalOperationsValue,
-      };
+      return token;
     } catch (err) {
       throw err;
     }

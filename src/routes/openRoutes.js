@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const FinancialApi = require("../api/financial.js");
-const OperationController = require("../controllers/OperationController.js");
 const UserController = require("../controllers/UserController.js");
 const passport = require("passport");
 const ApplicationError = require("../errors/ApplicationError.js");
@@ -37,8 +36,7 @@ router.post("/login", async (req, res, next) => {
       req.login(user, { session: false }, async (error) => {
         if (error) return next(error);
 
-        const body = { _id: user._id, username: user.username };
-        const token = jwt.sign({ user: body }, process.env.SECRET_KEY);
+        const token = "Bearer " + await UserController.createToken(user);
 
         return res.json({ token });
       });

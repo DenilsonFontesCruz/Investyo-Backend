@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const operationGroupSchema = new mongoose.Schema({
+const assetGroupSchema = new mongoose.Schema({
   id: { type: String },
   symbol: { type: String },
   quantity: { type: Number },
@@ -10,14 +10,8 @@ const operationGroupSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
   },
-  operations: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "operations",
-    },
-  ],
 });
 
-const operationGroups = mongoose.model("operationGroups", operationGroupSchema);
+const assets = mongoose.model("assets", assetGroupSchema);
 
-module.exports = operationGroups;
+module.exports = assets;
