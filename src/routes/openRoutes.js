@@ -3,7 +3,6 @@ const FinancialApi = require("../api/financial.js");
 const UserController = require("../controllers/UserController.js");
 const passport = require("passport");
 const ApplicationError = require("../errors/ApplicationError.js");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 router.get("/", (req, res, next) => {

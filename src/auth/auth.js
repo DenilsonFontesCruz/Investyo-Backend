@@ -1,9 +1,10 @@
 const passport = require("passport");
+const BlacklistController = require("../controllers/blacklistController");
 const localStrategy = require("passport-local").Strategy;
 const userController = require("../controllers/userController");
 const ApplicationError = require("../errors/ApplicationError");
-const JWTstrategy = require('passport-jwt').Strategy;
-const ExtractJWT = require('passport-jwt').ExtractJwt;
+const BearerStrategy = require("passport-http-bearer").Strategy;
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 passport.use(
@@ -43,10 +44,10 @@ passport.use(
           user.password
         );
 
-        if(!passwordIsValid) return done(new ApplicationError("Wrong password", 403));
+        if (!passwordIsValid)
+          return done(new ApplicationError("Wrong password", 403));
 
         return done(null, user);
-
       } catch (err) {
         done(err);
       }
@@ -55,17 +56,16 @@ passport.use(
 );
 
 passport.use(
-  new JWTstrategy (
-    {
-      secretOrKey: process.env.SECRET_KEY,
-      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
-    },
-    async (token, done) => {
-      try {
-        return done(null, token.user);
-      } catch (error) {
-        done(error);
+  new BearerStrategy(async (token, done) => {
+    try {
+      if (await BlacklistController.containToken(token)) {
+        done(new ApplicationError("Token Invalid", 401));
       }
+      const payload = jwt.verify(token, process.env.SECRET_KEY);
+      const user = payload.user;
+      return done(null, user);
+    } catch (error) {
+      done(error);
     }
-  )
+  })
 );

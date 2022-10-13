@@ -29,7 +29,7 @@ const app = express();
 app.use(passport.initialize());
 app.use(bodyParser.json());
 app.use(router);
-app.use("/user", passport.authenticate("jwt", { session: false }), secureRoute);
+app.use("/user", passport.authenticate("bearer", { session: false }), secureRoute);
 
 const port = process.env.PORT;
 

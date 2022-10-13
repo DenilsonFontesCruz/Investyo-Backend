@@ -2,8 +2,20 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const ApplicationError = require("../errors/ApplicationError");
 const ExchangeApi = require("../api/exchange");
-const delay = require("delay");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
+
+const encryptPassword = async (password) => {
+  try {
+    const hashPassword = await bcrypt.hash(
+      password,
+      +process.env.ROUND_TIMES
+    );
+    return hashPassword;
+  } catch (err) {
+    throw err;
+  }
+};
 
 class UserController {
   /*Register, Login, Log Out*/
@@ -14,7 +26,7 @@ class UserController {
         throw new ApplicationError("The user alredy exists", 409);
       }
 
-      const hashPassword = await this.encryptPassword(password);
+      const hashPassword = await encryptPassword(password);
       const user = new User({ username, password: hashPassword, balance: 0 });
 
       return await user.save();
@@ -51,19 +63,7 @@ class UserController {
     }
   };
 
-  static encryptPassword = async (password) => {
-    try {
-      const hashPassword = await bcrypt.hash(
-        password,
-        +process.env.ROUND_TIMES
-      );
-      return hashPassword;
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  static createToken = async (username) => {
+  static createToken = async (user) => {
     try {
       const body = { _id: user._id, username: user.username };
       const token = jwt.sign({ user: body }, process.env.SECRET_KEY, {
