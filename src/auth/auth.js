@@ -1,5 +1,5 @@
 const passport = require("passport");
-const BlacklistController = require("../controllers/blacklistController");
+const BlocklistController = require("../controllers/blocklistController");
 const localStrategy = require("passport-local").Strategy;
 const userController = require("../controllers/userController");
 const ApplicationError = require("../errors/ApplicationError");
@@ -33,6 +33,7 @@ passport.use(
     {
       usernameField: "username",
       passwordField: "password",
+      session: false,
     },
     async (username, password, done) => {
       try {
@@ -56,15 +57,17 @@ passport.use(
 );
 
 passport.use(
-  new BearerStrategy(async (token, done) => {
+  new BearerStrategy(async (acessToken, done) => {
     try {
-      if (await BlacklistController.containToken(token)) {
-        done(new ApplicationError("Token Invalid", 401));
+      if (await BlocklistController.containAcessToken(acessToken)) {
+        done(new ApplicationError("acessToken Invalid", 401));
       }
-      const payload = jwt.verify(token, process.env.SECRET_KEY);
+      const payload = jwt.verify(acessToken, process.env.SECRET_KEY);
       const user = payload.user;
       return done(null, user);
     } catch (error) {
+      if (error.name == "TokenExpiredError")
+        return done(new ApplicationError("Token Expired", 404));
       done(error);
     }
   })

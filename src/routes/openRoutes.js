@@ -3,6 +3,7 @@ const FinancialApi = require("../api/financial.js");
 const UserController = require("../controllers/UserController.js");
 const passport = require("passport");
 const ApplicationError = require("../errors/ApplicationError.js");
+const authMiddleware = require("../auth/authMiddleware.js");
 require("dotenv").config();
 
 router.get("/", (req, res, next) => {
@@ -26,23 +27,8 @@ router.post(
   }
 );
 
-router.post("/login", async (req, res, next) => {
-  passport.authenticate("login", async (err, user, info) => {
-    try {
-      if (err || !user)
-        return next(err || new ApplicationError("An error occurred.", 500));
+router.post("/login", [authMiddleware.localLogin, authMiddleware.sendToken]);
 
-      req.login(user, { session: false }, async (error) => {
-        if (error) return next(error);
-
-        const token = "Bearer " + await UserController.createToken(user);
-
-        return res.json({ token });
-      });
-    } catch (error) {
-      return next(error);
-    }
-  })(req, res, next);
-});
+router.post("/refresh", [authMiddleware.refreshToken, authMiddleware.sendToken]);
 
 module.exports = router;

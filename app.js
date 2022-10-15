@@ -1,7 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const mongoDB = require("./src/database/mongoDB");
-const redisDB = require("./src/database/redisDB");
+const redisBlocklist = require("./src/database/Redis/redisBlocklist-AcessToken");
+const redisAllowlist = require("./src/database/Redis/redisAllowlist-RefreshToken");
 const router = require("./src/routes/openRoutes.js");
 const secureRoute = require("./src/routes/secureRoutes.js");
 const bodyParser = require("body-parser");
@@ -16,13 +17,21 @@ mongoDB.once("open", () => {
   console.log(`Mongo Database connection successful`);
 });
 
-redisDB.on("error", (err) =>
+redisBlocklist.on("error", (err) =>
   console.log.bind(console, `Redis Database connection error`)
 );
 
-redisDB.ping().then((result) => {
-  if(result === "PONG") console.log(`Redis Database connection successful`);
-})
+redisBlocklist.ping().then((result) => {
+  if(result === "PONG") console.log(`Redis Blocklist connection successful`);
+});
+
+redisAllowlist.on("error", (err) =>
+  console.log.bind(console, `Redis Database connection error`)
+);
+
+redisAllowlist.ping().then((result) => {
+  if(result === "PONG") console.log(`Redis Allowlist connection successful`);
+});
 
 const app = express();
 

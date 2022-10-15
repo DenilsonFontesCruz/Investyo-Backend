@@ -1,7 +1,8 @@
 const UserController = require("../controllers/UserController");
 const ApplicationError = require("../errors/ApplicationError");
 const jwt = require("jsonwebtoken");
-const BlacklistController = require("../controllers/blacklistController");
+const BlocklistController = require("../controllers/blocklistController");
+const authMiddleware = require("../auth/authMiddleware");
 require("dotenv").config();
 
 const router = require("express").Router();
@@ -10,18 +11,7 @@ router.get("/profile", (req, res, next) => {
   res.send(`<h1>Bem Vindo: ${req.user.username}</h1>`);
 });
 
-router.get("/logout", async (req, res, next) => {
-  try {
-    const token = req.header("Authorization").replace('Bearer ', '')
-    
-    BlacklistController.addTokenInUserList(token);
-     
-    res.send("Sucessful Logout");
-
-  }catch(err) {
-    return next(err);
-  }
-});
+router.post("/logout", [authMiddleware.refreshToken, authMiddleware.logout]);
 
 
 module.exports = router;

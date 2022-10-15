@@ -3,14 +3,14 @@ const bcrypt = require("bcrypt");
 const ApplicationError = require("../errors/ApplicationError");
 const ExchangeApi = require("../api/exchange");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const moment = require("moment");
+const AllowlistController = require("./allowlistController");
 require("dotenv").config();
 
 const encryptPassword = async (password) => {
   try {
-    const hashPassword = await bcrypt.hash(
-      password,
-      +process.env.ROUND_TIMES
-    );
+    const hashPassword = await bcrypt.hash(password, +process.env.ROUND_TIMES);
     return hashPassword;
   } catch (err) {
     throw err;
@@ -63,14 +63,26 @@ class UserController {
     }
   };
 
-  static createToken = async (user) => {
+  static createAcessToken = (user) => {
     try {
-      const body = { _id: user._id, username: user.username };
-      const token = jwt.sign({ user: body }, process.env.SECRET_KEY, {
-        expiresIn: "15m",
+      const userId = user._id.toString()
+      const body = { _id: userId, username: user.username };
+      const acessToken = jwt.sign({ user: body }, process.env.SECRET_KEY, {
+        expiresIn: "20s",
       });
 
-      return token;
+      return acessToken;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  static createRefreshToken = async (user) => {
+    try {
+      const refreshToken = crypto.randomBytes(24).toString("hex");
+      const expirationDate = await moment().add(5, "d").unix();
+      AllowlistController.addRefreshToken(refreshToken, expirationDate, user._id.toString());
+      return refreshToken;
     } catch (err) {
       throw err;
     }
