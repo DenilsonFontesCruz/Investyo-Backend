@@ -14,13 +14,7 @@ class FinancialApi {
       if (!(data.length > 0)) {
         throw new ApplicationError("The symbol is not available", 404);
       } else {
-        const filteredData = {
-          name: data[0].name,
-          stockValue: data[0].price,
-          symbol: data[0].symbol,
-          category: data[0].exchange,
-        };
-        return filteredData;
+        return data[0].price;
       }
     } catch (err) {
       if (err.code === "ENOTFOUND") {
@@ -40,14 +34,14 @@ class FinancialApi {
       if (!(data.length > 0)) {
         throw new ApplicationError("Results not found", 404);
       } else {
-        const filteredData = data.map((i) => {
+        const companyList = data.map((i) => {
           return {
             name: i.name,
             symbol: i.symbol,
-            category: i.stockExchange
+            exchangeCompany: i.stockExchange,
           };
         });
-        return filteredData;
+        return companyList;
       }
     } catch (err) {
       if (err.code === "ENOTFOUND") {
