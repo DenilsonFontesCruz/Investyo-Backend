@@ -18,23 +18,22 @@ const encryptPassword = async (password) => {
 
 const changeBalance = async (user, value) => {
   try {
-    if(value < -20000 || value === 0 || value > 20000) {
+    if (value < -20000 || value === 0 || value > 20000) {
       throw new ApplicationError("Invalid Value", 403);
     }
     const newBalance = user.balance + value;
-    if(newBalance < 0) {
+    if (newBalance < 0) {
       throw new ApplicationError("Insufficient funds in Account", 403);
     }
     user.balance = newBalance;
 
-    await user.save();
+    return user;
   } catch (err) {
     throw err;
   }
 };
 
 class UserController {
-
   static createUser = async (username, password) => {
     try {
       if (await this.findByUsername(username)) {
@@ -108,7 +107,7 @@ class UserController {
   static addFunds = async (userId, value) => {
     try {
       const user = await UserController.findById(userId);
-      await changeBalance(user, value);
+      return await changeBalance(user, value);
     } catch (err) {
       throw err;
     }
@@ -117,7 +116,7 @@ class UserController {
   static withdrawFunds = async (userId, value) => {
     try {
       const user = await UserController.findById(userId);
-      await changeBalance(user, -value);
+      return await changeBalance(user, -value);
     } catch (err) {
       throw err;
     }

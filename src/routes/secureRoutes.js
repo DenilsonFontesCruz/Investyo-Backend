@@ -5,21 +5,32 @@ const jwt = require("jsonwebtoken");
 const BlocklistController = require("../controllers/blocklistController");
 const authMiddleware = require("../auth/authMiddleware");
 const AssetController = require("../controllers/assetController");
+const ExtractController = require("../controllers/extractController");
 require("dotenv").config();
 
 const router = require("express").Router();
 
-router.get("/profile", async (req, res, next) => {
+router.get("/profile/wallet", async (req, res, next) => {
   const user = await UserController.findById(req.user._id);
-  const assets = await (await user.populate("assets")).assets;
-  const formattedAssets = Promise.all(assets.map( async (i) => {
-    return await AssetController.findAssetById(i);
-  }))
+  const assetController = new AssetController(user);
+  const assets = await assetController.getAllAssetsOfUser();
   res.json(
     {
       username: user.username,
       balance: user.balance,
       assets
+    }
+  );
+});
+
+router.get("/profile/extract", async (req, res, next) => {
+  const user = await UserController.findById(req.user._id);
+  const extractController = new ExtractController(user);
+  const extracts = await extractController.getAllExtractsOfUser();
+  res.json(
+    {
+      username: user.username,
+      extracts
     }
   );
 });
@@ -35,7 +46,15 @@ router.post("/change_balance", async (req, res, next) => {
     if (operationType !== "addFunds" && operationType !== "withdrawFunds") {
       next(new ApplicationError("Invalid Operation Type", 403));
     }
-    await UserController[operationType](req.user._id, value);
+    const user = await UserController.findById(req.user._id);
+    const extractController = new ExtractController(user);
+
+    const updatedUser = await UserController[operationType](req.user._id, value);
+    const extract = await extractController.createExtract(value, operationType);
+    updatedUser.extracts.push(extract);
+
+    await updatedUser.save();
+    
     res.status(200).send("Operation completed successfully");
   } catch (err) {
     next(err);
