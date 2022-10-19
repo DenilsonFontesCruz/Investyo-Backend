@@ -13,7 +13,7 @@ class AssetController {
   static searchCompanyByName = async (name) => {
     try {
       const companyList = await FinancialApi.findByName(name);
-      return result;
+      return companyList;
     } catch (err) {
       throw err;
     }
