@@ -117,6 +117,11 @@ class AssetController {
     try {
       const stockValue = await FinancialApi.findBySymbol(symbol);
       const asset = await this.findUserAssetBySymbol(symbol);
+      const operationValue = quantity * stockValue;
+      const user = await UserController.withdrawFunds(
+        this.user._id,
+        operationValue
+      );
       if (!asset) {
         const newAsset = await this.createAsset({
           symbol,
@@ -133,12 +138,7 @@ class AssetController {
         });
         await updatedAsset.save();
       }
-      const operationValue = quantity * stockValue;
 
-      const user = await UserController.withdrawFunds(
-        this.user._id,
-        operationValue
-      );
       const extractController = new ExtractController(user);
       const extract = await extractController.createExtract(
         operationValue,
@@ -164,16 +164,15 @@ class AssetController {
         stockValue: -stockValue,
       });
       if (asset.quantity == 0) {
-        return await this.deleteAsset(asset._id);
+        await this.deleteAsset(asset._id);
       }
-      await asset.save();
+      else {
+        await asset.save();
+      }
 
       const operationValue = quantity * stockValue;
-      const user = await UserController.addFunds(
-        this.user._id,
-        operationValue
-      );
-      
+      const user = await UserController.addFunds(this.user._id, operationValue);
+
       const extractController = new ExtractController(user);
       const extract = await extractController.createExtract(
         operationValue,
