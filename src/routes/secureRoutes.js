@@ -100,4 +100,18 @@ router.post("/perform_operation", async (req, res, next) => {
   }
 });
 
+router.get("/api/historical_values", async (req, res, next) => {
+  try {
+    const days = req.query.days;
+    if (!days || isNaN(days) || days <= 0) {
+      next (new InvalidArgumentError());
+    }
+    const listOfValues = await AssetController.getHistoricalValues(days);
+
+    res.send(listOfValues);
+  } catch (err) {
+    next(err);
+  }
+})
+
 module.exports = router;

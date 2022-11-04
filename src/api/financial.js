@@ -25,6 +25,31 @@ class FinancialApi {
     }
   };
 
+  static getHistorialValues = async (days) => {
+    try {
+      const apiRequest = await axios.get(
+        `https://financialmodelingprep.com/api/v3/historical-price-full/AAPL?timeseries=${days}&apikey=${apiKey}`
+      )
+      const data = apiRequest.data.historical;
+      if (!(data.length > 0)) {
+        throw new ApplicationError("Results not found", 404);
+      }
+      const valueList = data.map((i) => {
+        return {
+          date: i.date,
+          value: i.close,
+        };
+      });
+      return valueList;
+    } catch (err) {
+      if (err.code === "ENOTFOUND") {
+        throw new ApplicationError("The host is not found", 503);
+      } else {
+        throw err;
+      }
+    }
+  };
+
   static findByName = async (name) => {
     try {
       const apiRequest = await axios.get(

@@ -28,6 +28,14 @@ class AssetController {
     }
   };
 
+  static getHistoricalValues = async (days) => {
+    try {
+      return await FinancialApi.getHistorialValues(days);
+    } catch (err) {
+      throw err;
+    }
+  };
+
   static findAssetById = async (id) => {
     try {
       const asset = await Asset.findById(id);
@@ -164,7 +172,9 @@ class AssetController {
         stockValue: -stockValue,
       });
       if (asset.quantity == 0) {
-        return await this.deleteAsset(asset._id);
+        await this.deleteAsset(asset._id);
+      } else {
+        await asset.save();
       }
       await asset.save();
 
@@ -186,6 +196,7 @@ class AssetController {
       throw err;
     }
   };
+
 }
 
 module.exports = AssetController;
