@@ -80,7 +80,7 @@ class UserController {
       const userId = user._id.toString();
       const body = { _id: userId, username: user.username };
       const acessToken = jwt.sign({ user: body }, process.env.SECRET_KEY, {
-        expiresIn: "1m",
+        expiresIn: "15m",
       });
 
       return acessToken;
