@@ -25,10 +25,10 @@ class FinancialApi {
     }
   };
 
-  static getHistorialValues = async (days) => {
+  static getHistorialValues = async (days, symbol) => {
     try {
       const apiRequest = await axios.get(
-        `https://financialmodelingprep.com/api/v3/historical-price-full/AAPL?timeseries=${days}&apikey=${apiKey}`
+        `https://financialmodelingprep.com/api/v3/historical-price-full/${symbol}?timeseries=${days}&apikey=${apiKey}`
       )
       const data = apiRequest.data.historical;
       if (!(data.length > 0)) {

@@ -28,9 +28,9 @@ class AssetController {
     }
   };
 
-  static getHistoricalValues = async (days) => {
+  static getHistoricalValues = async (days, symbol) => {
     try {
-      return await FinancialApi.getHistorialValues(days);
+      return await FinancialApi.getHistorialValues(days, symbol);
     } catch (err) {
       throw err;
     }

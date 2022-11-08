@@ -7,7 +7,7 @@ const authMiddleware = require("../auth/authMiddleware.js");
 require("dotenv").config();
 
 router.get("/", (req, res, next) => {
-  res.send(`<h1>Test</h1>`);
+  res.send(`Connection working`);
 });
 
 router.post("/stocks", async (req, res, next) => {

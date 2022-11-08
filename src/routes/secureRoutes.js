@@ -102,10 +102,11 @@ router.post("/perform_operation", async (req, res, next) => {
 router.get("/api/historical_values", async (req, res, next) => {
   try {
     const days = req.query.days;
-    if (!days || isNaN(days) || days <= 0) {
+    const symbol = req.query.symbol;
+    if (!days || isNaN(days) || days <= 0 || !symbol) {
       next (new InvalidArgumentError());
     }
-    const listOfValues = await AssetController.getHistoricalValues(days);
+    const listOfValues = await AssetController.getHistoricalValues(days, symbol);
 
     res.send(listOfValues);
   } catch (err) {

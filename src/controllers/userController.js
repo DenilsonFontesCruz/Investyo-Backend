@@ -18,7 +18,7 @@ const encryptPassword = async (password) => {
 
 const changeBalance = async (user, value) => {
   try {
-    if (value < -20000 || value === 0 || value > 20000) {
+    if (value < -20000 || value === 0 || value > 20000 || isNaN(+value)) {
       throw new ApplicationError("Invalid Value", 403);
     }
     const newBalance = user.balance + value;
@@ -80,7 +80,7 @@ class UserController {
       const userId = user._id.toString();
       const body = { _id: userId, username: user.username };
       const acessToken = jwt.sign({ user: body }, process.env.SECRET_KEY, {
-        expiresIn: "15m",
+        expiresIn: "60m",
       });
 
       return acessToken;
