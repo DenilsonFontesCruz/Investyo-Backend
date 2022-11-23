@@ -14,15 +14,29 @@ router.get("/profile/wallet", async (req, res, next) => {
     const user = await UserController.findById(req.user._id);
     const assetController = new AssetController(user);
     const assets = await assetController.getAllAssetsOfUser();
+    const totalValue = await assetController.getTotalValue(assets);
     res.json({
       username: user.username,
       balance: user.balance,
       assets,
+      totalValue
     });
   } catch (err) {
     next(err);
   }
 });
+
+router.get("/profile/", async (req, res, next) => {
+  try {
+    const user = await UserController.findById(req.user._id);
+    res.json({
+      username: user.username,
+      balance: user.balance,
+    });
+  } catch (err) {
+    next(err);
+  }
+})
 
 router.get("/profile/extract", async (req, res, next) => {
   try {
@@ -56,7 +70,7 @@ router.get("/api/search_name", async (req, res, next) => {
 router.post("/change_balance", async (req, res, next) => {
   try {
     const { operationType, value } = req.body;
-    if (!operationType || !value || isNaN(value)) {
+    if (!operationType || !value || isNaN(value) || !(typeof value === "number")) {
       next(new InvalidArgumentError());
     }
     if (operationType !== "addFunds" && operationType !== "withdrawFunds") {

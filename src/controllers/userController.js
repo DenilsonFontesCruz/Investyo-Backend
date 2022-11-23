@@ -18,7 +18,7 @@ const encryptPassword = async (password) => {
 
 const changeBalance = async (user, value) => {
   try {
-    if (value < -20000 || value === 0 || value > 20000 || isNaN(+value)) {
+    if (value < -20000 || value === 0 || value > 20000 || isNaN(value) || !(typeof value === "number")) {
       throw new ApplicationError("Invalid Value", 403);
     }
     const newBalance = user.balance + value;

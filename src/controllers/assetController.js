@@ -45,11 +45,25 @@ class AssetController {
     }
   };
 
+  getTotalValue = async (assets) => {
+    try {
+      var totalValue = 0;
+      assets.forEach(element => {
+        console.log(element.totalValue);
+        totalValue += element.totalValue;
+      });
+
+      return totalValue;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   getAllAssetsOfUser = async () => {
     try {
       const assetsList = (await this.user.populate("assets")).assets;
       const formattedAssets = await assetsList.map(async (asset) => {
-        const currentValue = await AssetController.getCurrentValueBySymbol(
+      const currentValue = await AssetController.getCurrentValueBySymbol(
           asset.symbol
         );
         return {
@@ -173,8 +187,7 @@ class AssetController {
       });
       if (asset.quantity == 0) {
         await this.deleteAsset(asset._id);
-      }
-      else {
+      } else {
         await asset.save();
       }
 
@@ -193,7 +206,6 @@ class AssetController {
       throw err;
     }
   };
-
 }
 
 module.exports = AssetController;
